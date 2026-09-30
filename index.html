@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Comment Bot</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #1f2937;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 20px;
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin: 8px 0 12px;
+            border: 1px solid #374151;
+            border-radius: 10px;
+            background: #111827;
+            color: white;
+            font-size: 15px;
+        }
+
+        button {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        #result {
+            margin-top: 15px;
+            color: #d1d5db;
+        }
+
+        .campaign {
+            background: #111827;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 12px;
+        }
+
+        .campaign-name {
+            font-weight: bold;
+            font-size: 17px;
+        }
+
+        .campaign-link {
+            color: #60a5fa;
+            word-break: break-all;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🤖 Comment Bot</h1>
+
+    <div class="subtitle">
+        Dashboard quản lý hệ thống
+    </div>
+
+    <div class="card">
+
+        <h2>System Status</h2>
+
+        <span class="status">
+            ● Online
+        </span>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>➕ Tạo Campaign</h2>
+
+        <input
+            id="campaignName"
+            type="text"
+            placeholder="Tên Campaign"
+        >
+
+        <input
+            id="campaignLink"
+            type="url"
+            placeholder="Link đích"
+        >
+
+        <button onclick="createCampaign()">
+            Tạo Campaign
+        </button>
+
+        <p id="result"></p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>📋 Campaigns</h2>
+
+        <div id="campaignList">
+            Chưa có campaign nào.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function createCampaign() {
+
+    const name =
+        document.getElementById("campaignName").value.trim();
+
+    const link =
+        document.getElementById("campaignLink").value.trim();
+
+    const result =
+        document.getElementById("result");
+
+    if (!name || !link) {
+
+        result.innerText =
+            "⚠️ Vui lòng nhập đầy đủ tên và link.";
+
+        return;
+    }
+
+    result.innerText =
+        "⏳ Đang tạo campaign...";
+
+    try {
+
+        const response = await fetch(
+            "/.netlify/functions/campaigns",
+            {
+                method: "POST"
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message || "Không thể tạo campaign."
+            );
+        }
+
+        result.innerText =
+            "✅ Campaign đã được tạo!";
+
+        document.getElementById("campaignName").value = "";
+        document.getElementById("campaignLink").value = "";
+
+        loadCampaigns();
+
+    } catch (error) {
+
+        result.innerText =
+            "❌ Lỗi: " + error.message;
+
+        console.error(error);
+    }
+}
+
+
+async function loadCampaigns() {
+
+    const list =
+        document.getElementById("campaignList");
+
+    try {
+
+        const response = await fetch(
+            "/.netlify/functions/campaigns"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error("Không thể tải campaign.");
+        }
+
+        if (!Array.isArray(data) || data.length === 0) {
+
+            list.innerHTML =
+                "Chưa có campaign nào.";
+
+            return;
+        }
+
+        list.innerHTML = "";
+
+        data.forEach(campaign => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "campaign";
+
+            div.innerHTML = `
+                <div class="campaign-name">
+                    ${campaign.name}
+                </div>
+
+                <div class="campaign-link">
+                    ${campaign.link}
+                </div>
+
+                <div style="margin-top:8px;color:#9ca3af;">
+                    Status: ${campaign.status}
+                </div>
+            `;
+
+            list.appendChild(div);
+        });
+
+    } catch (error) {
+
+        list.innerText =
+            "❌ Không thể tải campaign.";
+
+        console.error(error);
+    }
+}
+
+
+loadCampaigns();
+
+</script>
+
+</body>
+</html>
