@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Comment Bot</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #1f2937;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 20px;
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        button {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        #result {
+            margin-top: 15px;
+            color: #d1d5db;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🤖 Comment Bot</h1>
+
+    <div class="subtitle">
+        Dashboard quản lý hệ thống
+    </div>
+
+
+    <div class="card">
+
+        <h2>System Status</h2>
+
+        <span class="status">
+            ● Online
+        </span>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>Campaigns</h2>
+
+        <p>
+            Active campaigns:
+            <strong>0</strong>
+        </p>
+
+        <p>
+            Opportunities found:
+            <strong>0</strong>
+        </p>
+
+        <p>
+            Comments processed:
+            <strong>0</strong>
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>Test</h2>
+
+        <button onclick="testBot()">
+            Test System
+        </button>
+
+        <p id="result"></p>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function testBot() {
+
+    const result = document.getElementById("result");
+
+    result.innerText = "⏳ Đang kết nối backend...";
+
+    try {
+
+        const response = await fetch(
+            "/.netlify/functions/campaigns"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message || "Backend trả về lỗi"
+            );
+
+        }
+
+        result.innerText =
+            "✅ Kết nối thành công! Campaign đã được tạo.";
+
+        console.log("Backend response:", data);
+
+    } catch (error) {
+
+        result.innerText =
+            "❌ Lỗi: " + error.message;
+
+        console.error("Backend error:", error);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
